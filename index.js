@@ -4,16 +4,19 @@ const admin = require('firebase-admin');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
 app.use(cors());
 
 if (!process.env.FIREBASE_KEY) {
   console.error('❌ La variable de entorno FIREBASE_KEY no está definida.');
   process.exit(1);
 }
+function cleanFirebaseKey(key) {
+  return key.replace(/\\n/g, '\n');
+}
+
 let serviceAccount;
 try {
-serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+  serviceAccount = JSON.parse(cleanFirebaseKey(process.env.FIREBASE_KEY));
 } catch (error) {
   console.error('❌ Error al parsear FIREBASE_KEY:', error.message);
   process.exit(1);
@@ -24,7 +27,6 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-
 
 app.get('/api/operatividad', async (req, res) => {
   try {
