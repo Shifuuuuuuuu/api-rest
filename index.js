@@ -10,18 +10,13 @@ if (!process.env.FIREBASE_KEY) {
   console.error('❌ La variable de entorno FIREBASE_KEY no está definida.');
   process.exit(1);
 }
-function cleanFirebaseKey(key) {
-  return key.replace(/\\n/g, '\n');
-}
-
 let serviceAccount;
 try {
-  serviceAccount = JSON.parse(cleanFirebaseKey(process.env.FIREBASE_KEY));
+  serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
 } catch (error) {
   console.error('❌ Error al parsear FIREBASE_KEY:', error.message);
   process.exit(1);
 }
-
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
