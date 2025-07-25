@@ -5,28 +5,37 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-
-// Leer la clave de Firebase desde una variable de entorno
-const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
-
-// Inicializar Firebase
+if (!process.env.FIREBASE_KEY) {
+  console.error('❌ La variable de entorno FIREBASE_KEY no está definida.');
+  process.exit(1); // Detener ejecución
+}
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+} catch (error) {
+  console.error('❌ Error al parsear FIREBASE_KEY:', error.message);
+  process.exit(1);
+}
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
 const db = admin.firestore();
 
-// Ruta: /api/operatividad
 app.get('/api/operatividad', async (req, res) => {
-  const snapshot = await db.collection('operatividad').get();
-  const datos = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-  res.json(datos);
+  try {
+    const snapshot = await db.collection('operatividad').get();
+    const datos = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    res.json(datos);
+  } catch (err) {
+    console.error('Error al obtener operatividad:', err);
+    res.status(500).json({ error: 'Error al obtener operatividad' });
+  }
 });
 
-// Ruta: /api/usuarios
 app.get('/api/usuarios', async (req, res) => {
   try {
     const snapshot = await db.collection('usuarios').get();
@@ -41,7 +50,6 @@ app.get('/api/usuarios', async (req, res) => {
   }
 });
 
-// Ruta: /api/equipos
 app.get('/api/equipos', async (req, res) => {
   try {
     const snapshot = await db.collection('equipos').get();
@@ -56,7 +64,6 @@ app.get('/api/equipos', async (req, res) => {
   }
 });
 
-// Ruta: /api/contratos
 app.get('/api/contratos', async (req, res) => {
   try {
     const snapshot = await db.collection('contratos').get();
@@ -69,8 +76,4 @@ app.get('/api/contratos', async (req, res) => {
     console.error('Error al obtener contratos:', err);
     res.status(500).json({ error: 'Error al obtener contratos' });
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`✅ API escuchando en http://localhost:${PORT}`);
 });
