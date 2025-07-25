@@ -13,10 +13,11 @@ if (!process.env.FIREBASE_KEY) {
   process.exit(1);
 }
 
-// Parsear clave de servicio
+// Parsear clave de servicio, reemplazando \\n por saltos de línea reales
 let serviceAccount;
 try {
-  serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+  const firebaseKeyFixed = process.env.FIREBASE_KEY.replace(/\\n/g, '\n');
+  serviceAccount = JSON.parse(firebaseKeyFixed);
 } catch (error) {
   console.error('❌ Error al parsear FIREBASE_KEY:', error.message);
   process.exit(1);
