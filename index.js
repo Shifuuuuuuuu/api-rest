@@ -4,8 +4,10 @@ const admin = require('firebase-admin');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Importar la clave de servicio de Firebase
-const serviceAccount = require('./serviceAccountKey.json');
+app.use(cors());
+
+// Leer la clave de Firebase desde una variable de entorno
+const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
 
 // Inicializar Firebase
 admin.initializeApp({
@@ -14,6 +16,7 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
+// Ruta: /api/operatividad
 app.get('/api/operatividad', async (req, res) => {
   const snapshot = await db.collection('operatividad').get();
   const datos = snapshot.docs.map(doc => ({
@@ -22,7 +25,6 @@ app.get('/api/operatividad', async (req, res) => {
   }));
   res.json(datos);
 });
-
 
 // Ruta: /api/usuarios
 app.get('/api/usuarios', async (req, res) => {
@@ -68,7 +70,6 @@ app.get('/api/contratos', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener contratos' });
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`✅ API escuchando en http://localhost:${PORT}`);
